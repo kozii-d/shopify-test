@@ -38,14 +38,15 @@ export function ProductsList() {
         getProduct({variables: {first: 10}});
     }, []);
 
-    if (loading || !data) return <Loading/>;
-
     if (error) {
         console.warn(error);
         return (
             <Banner status="critical">There was an issue loading products.</Banner>
         );
     }
+
+    if (loading || !data) return <Loading/>;
+
 
     const onNext = () => {
         const edges = data.products.edges;
