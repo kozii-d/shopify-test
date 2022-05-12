@@ -47,9 +47,29 @@ export function ProductsList() {
         handleQueryValueRemove,
     ]);
 
-
-
+    //todo: при использовании пагинации и фильтра падает приложение
     const [getProduct, {loading, error, data, refetch}] = useLazyQuery(GET_PRODUCT_PAGE);
+
+    const onNext = useCallback(() => {
+        const edges = data.products.edges;
+        getProduct({
+            variables: {
+                first: 10,
+                after: edges[edges.length - 1].cursor
+            }
+        });
+    }, [getProduct, data]);
+
+
+    const onPrevious = useCallback(() => {
+        const edges = data.products.edges;
+        getProduct({
+            variables: {
+                last: 10,
+                before: edges[0].cursor
+            }
+        });
+    }, [getProduct, data]);
 
     useEffect(() => {
         getProduct({
@@ -73,27 +93,6 @@ export function ProductsList() {
     }
 
     if (loading || !data) return <Loading/>;
-
-
-    const onNext = () => {
-        const edges = data.products.edges;
-        getProduct({
-            variables: {
-                first: 10,
-                after: edges[edges.length - 1].cursor
-            }
-        });
-    };
-
-    const onPrevious = () => {
-        const edges = data.products.edges;
-        getProduct({
-            variables: {
-                last: 10,
-                before: edges[0].cursor
-            }
-        });
-    };
 
     return (
         <Card sectioned>
