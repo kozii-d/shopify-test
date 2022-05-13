@@ -37,11 +37,25 @@ export default function App() {
 function MyProvider({ children }) {
   const app = useAppBridge();
 
+  const defaultOptions = {
+    watchQuery: {
+      fetchPolicy: 'no-cache',
+      nextFetchPolicy: 'no-cache',
+      errorPolicy: 'ignore',
+    },
+    query: {
+      fetchPolicy: 'no-cache',
+      nextFetchPolicy: 'no-cache',
+      errorPolicy: 'all',
+    },
+  }
+
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: new HttpLink({
       credentials: "include",
       fetch: userLoggedInFetch(app),
+      defaultOptions: defaultOptions,
     }),
   });
 

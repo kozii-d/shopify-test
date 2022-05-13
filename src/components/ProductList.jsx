@@ -9,7 +9,7 @@ import {
 } from "@shopify/polaris";
 import {gql, useLazyQuery} from "@apollo/client";
 import {Loading} from "@shopify/app-bridge-react";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {useSearchParams} from "react-router-dom";
 
 const GET_PRODUCT_PAGE = gql`
@@ -47,29 +47,7 @@ export function ProductsList() {
         handleQueryValueRemove,
     ]);
 
-    //todo: при использовании пагинации и фильтра падает приложение
-    const [getProduct, {loading, error, data, refetch}] = useLazyQuery(GET_PRODUCT_PAGE);
-
-    const onNext = useCallback(() => {
-        const edges = data.products.edges;
-        getProduct({
-            variables: {
-                first: 10,
-                after: edges[edges.length - 1].cursor
-            }
-        });
-    }, [getProduct, data]);
-
-
-    const onPrevious = useCallback(() => {
-        const edges = data.products.edges;
-        getProduct({
-            variables: {
-                last: 10,
-                before: edges[0].cursor
-            }
-        });
-    }, [getProduct, data]);
+    const [getProduct, {loading, error, data, previousData}] = useLazyQuery(GET_PRODUCT_PAGE);
 
     useEffect(() => {
         getProduct({
@@ -80,10 +58,41 @@ export function ProductsList() {
     }, []);
 
     useEffect(() => {
-        refetch({
-            query: queryValue
+        getProduct({
+            variables: {
+                first: 10,
+                query: queryValue
+            }
         });
     }, [queryValue]);
+
+
+    const onNext = useCallback(() => {
+        const edges = data.products.edges;
+        getProduct({
+            variables: {
+                first: 10,
+                last: null,
+                after: edges[edges.length - 1].cursor,
+                before: null,
+            }
+        });
+        // console.log(data, previousData)
+    }, [getProduct, data]);
+
+
+    const onPrevious = useCallback(() => {
+        const edges = data.products.edges;
+        getProduct({
+            variables: {
+                first: null,
+                last: 10,
+                after: null,
+                before: edges[0].cursor,
+            }
+        });
+    }, [getProduct, data]);
+
 
     if (error) {
         console.warn(error);
@@ -92,13 +101,15 @@ export function ProductsList() {
         );
     }
 
-    if (loading || !data) return <Loading/>;
+    // if (loading || !data) return <Loading/>;
+    if (!previousData && !data) return <Loading/>;
 
     return (
         <Card sectioned>
             <ResourceList
-                resourceName={{singular: 'customer', plural: 'customers'}}
-                items={data.products.edges}
+                resourceName={{singular: 'product', plural: 'products'}}
+                loading={loading}
+                items={data ? data.products.edges : previousData.products.edges}
                 filterControl={
                 <Filters
                     filters={[]}
@@ -126,8 +137,8 @@ export function ProductsList() {
                     );
                 }}
             />
-            <Pagination hasPrevious={data.products.pageInfo.hasPreviousPage} onPrevious={onPrevious} onNext={onNext}
-                        hasNext={data.products.pageInfo.hasNextPage}/>
+            <Pagination hasPrevious={data && data.products.pageInfo.hasPreviousPage} onPrevious={onPrevious} onNext={onNext}
+                        hasNext={data && data.products.pageInfo.hasNextPage}/>
         </Card>
     );
 }
