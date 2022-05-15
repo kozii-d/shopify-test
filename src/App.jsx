@@ -5,11 +5,11 @@ import {
   InMemoryCache,
 } from "@apollo/client";
 import {
-  Provider as AppBridgeProvider,
+  Provider as AppBridgeProvider, TitleBar,
   useAppBridge,
 } from "@shopify/app-bridge-react";
 import { authenticatedFetch } from "@shopify/app-bridge-utils";
-import { Redirect } from "@shopify/app-bridge/actions";
+import {AppLink, NavigationMenu, Redirect} from "@shopify/app-bridge/actions";
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
 import translations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";
@@ -18,6 +18,22 @@ import { HomePage } from "./components/HomePage";
 import {Routes, Route, BrowserRouter} from "react-router-dom";
 
 export default function App() {
+  const primaryAction = {content: 'Foo', url: '/foo'};
+  const secondaryActions = [{content: 'Bar', url: '/bar', loading: true}];
+  const actionGroups = [{title: 'Baz', actions: [{content: 'Baz', url: '/baz'}]}];
+
+  // const itemsLink = AppLink.create(app, {
+  //   label: 'Items',
+  //   destination: '/items',
+  // });
+  // const settingsLink = AppLink.create(app, {
+  //   label: 'Settings',
+  //   destination: '/settings',
+  // });
+  // const navigationMenu = NavigationMenu.create(app, {
+  //   items: [itemsLink, settingsLink],
+  //   active: settingsLink,
+  // });
   return (
       <BrowserRouter>
         <PolarisProvider i18n={translations}>
@@ -29,6 +45,12 @@ export default function App() {
               }}
           >
             <MyProvider>
+              <TitleBar
+                  title="Hello world!"
+                  primaryAction={primaryAction}
+                  secondaryActions={secondaryActions}
+                  actionGroups={actionGroups}
+              />
               <Routes>
                 <Route path='/*' element={<HomePage />}></Route>
               </Routes>

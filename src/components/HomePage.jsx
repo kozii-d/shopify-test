@@ -1,12 +1,6 @@
 import {
-    Card,
     Page,
     Layout,
-    TextContainer,
-    Image,
-    Stack,
-    Link,
-    Heading, Pagination,
 } from "@shopify/polaris";
 
 import {ProductsCard} from "./ProductsCard";
