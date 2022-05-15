@@ -8,13 +8,13 @@ import {
     Pagination, Filters
 } from "@shopify/polaris";
 import {gql, useLazyQuery} from "@apollo/client";
-import {Loading} from "@shopify/app-bridge-react";
-import {useCallback, useEffect, useMemo, useState} from "react";
-import {useSearchParams} from "react-router-dom";
+import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {useCallback, useEffect, useMemo} from "react";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 
 const GET_PRODUCT_PAGE = gql`
-    query getProducts($first: Int, $last: Int, $after: String, $before: String, $query: String) {
-        products(first: $first, last: $last, after: $after, before: $before, query: $query) {
+    query getProducts($first: Int, $last: Int, $after: String, $before: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+        products(first: $first, last: $last, after: $after, before: $before, query: $query, sortKey: $sortKey, reverse: $reverse) {
             pageInfo {
                 hasNextPage
                 hasPreviousPage
@@ -34,37 +34,49 @@ const GET_PRODUCT_PAGE = gql`
 `;
 
 export function ProductsList() {
-    const [queryValue, setQueryValue] = useState(null);
+    // todo: изначально в searchParams есть данные от шопифая. Узнать нужны ли они
+    let [searchParams, setSearchParams] = useSearchParams();
+
+    let location = useLocation();
+    let navigate = useNavigate();
+    useRoutePropagation(location);
+    useClientRouting({
+        replace(path) {
+            navigate(path);
+        }
+    });
+
+
+    const currentParams = useMemo(() => Object.fromEntries([...searchParams]), [searchParams]);
+    const isReverse = useMemo(() => searchParams.get('sort') === 'TITLE_Z-A', [searchParams]);
+
 
     const handleFiltersQueryChange = useCallback(
-        (value) => setQueryValue(value),
+        (value) => setSearchParams({...currentParams, queryValue: value}),
         [],
     );
-    const handleQueryValueRemove = useCallback(() => setQueryValue(null), []);
+    const handleQueryValueRemove = useCallback(() => setSearchParams({...currentParams, queryValue: ''}), []);
     const handleFiltersClearAll = useCallback(() => {
         handleQueryValueRemove();
     }, [
         handleQueryValueRemove,
     ]);
 
+
     const [getProduct, {loading, error, data, previousData}] = useLazyQuery(GET_PRODUCT_PAGE);
 
-    useEffect(() => {
-        getProduct({
-            variables: {
-                first: 10,
-            }
-        });
-    }, []);
 
     useEffect(() => {
+        setSearchParams({...currentParams, sort: 'TITLE_A-Z'});
         getProduct({
             variables: {
                 first: 10,
-                query: queryValue
+                query: searchParams.get('queryValue'),
+                sortKey: 'TITLE',
+                reverse: isReverse,
             }
         });
-    }, [queryValue]);
+    }, [searchParams]);
 
 
     const onNext = useCallback(() => {
@@ -75,11 +87,11 @@ export function ProductsList() {
                 last: null,
                 after: edges[edges.length - 1].cursor,
                 before: null,
+                sortKey: 'TITLE',
+                reverse: isReverse,
             }
         });
-        // console.log(data, previousData)
     }, [getProduct, data]);
-
 
     const onPrevious = useCallback(() => {
         const edges = data.products.edges;
@@ -89,6 +101,8 @@ export function ProductsList() {
                 last: 10,
                 after: null,
                 before: edges[0].cursor,
+                sortKey: 'TITLE',
+                reverse: isReverse,
             }
         });
     }, [getProduct, data]);
@@ -101,7 +115,6 @@ export function ProductsList() {
         );
     }
 
-    // if (loading || !data) return <Loading/>;
     if (!previousData && !data) return <Loading/>;
 
     return (
@@ -110,10 +123,19 @@ export function ProductsList() {
                 resourceName={{singular: 'product', plural: 'products'}}
                 loading={loading}
                 items={data ? data.products.edges : previousData.products.edges}
+                sortValue={searchParams.get('sort')}
+                sortOptions={[
+                    {label: 'Title (A-Z)', value: 'TITLE_A-Z'},
+                    {label: 'Title (Z-A)', value: 'TITLE_Z-A'},
+                ]}
+                onSortChange={(selected) => {
+                    setSearchParams({...currentParams, sort: selected})
+                    console.log(`Sort option changed to ${selected}.`);
+                }}
                 filterControl={
                 <Filters
                     filters={[]}
-                    queryValue={queryValue}
+                    queryValue={searchParams.get('queryValue')}
                     onQueryChange={handleFiltersQueryChange}
                     onQueryClear={handleQueryValueRemove}
                     onClearAll={handleFiltersClearAll}
