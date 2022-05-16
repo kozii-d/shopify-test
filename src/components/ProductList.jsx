@@ -34,8 +34,6 @@ const GET_PRODUCT_PAGE = gql`
 `;
 
 export function ProductsList() {
-    // todo: изначально в searchParams есть данные от шопифая. Узнать нужны ли они
-    // todo: спросить как задать стандартные параметры searchParams для сортировки
     let [searchParams, setSearchParams] = useSearchParams({sort: 'TITLE_A-Z'});
 
     let location = useLocation();
