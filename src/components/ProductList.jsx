@@ -9,8 +9,9 @@ import {
 } from "@shopify/polaris";
 import {gql, useLazyQuery} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
-import {useCallback, useEffect, useMemo} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
+import {useDebouncedEffect} from "../customHooks/useDebouncedEffect.jsx";
 
 const GET_PRODUCT_PAGE = gql`
     query getProducts($first: Int, $last: Int, $after: String, $before: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
@@ -35,6 +36,7 @@ const GET_PRODUCT_PAGE = gql`
 
 export function ProductsList() {
     let [searchParams, setSearchParams] = useSearchParams({sort: 'TITLE_A-Z'});
+    const [queryValue, setQueryValue] = useState('');
 
     let location = useLocation();
     let navigate = useNavigate();
@@ -51,10 +53,10 @@ export function ProductsList() {
 
 
     const handleFiltersQueryChange = useCallback(
-        (value) => setSearchParams({...currentParams, queryValue: value}),
+        (value) => setQueryValue(value),
         [],
     );
-    const handleQueryValueRemove = useCallback(() => setSearchParams({...currentParams, queryValue: ''}), []);
+    const handleQueryValueRemove = useCallback(() => setQueryValue(''), []);
     const handleFiltersClearAll = useCallback(() => {
         handleQueryValueRemove();
     }, [
@@ -64,6 +66,9 @@ export function ProductsList() {
 
     const [getProduct, {loading, error, data, previousData}] = useLazyQuery(GET_PRODUCT_PAGE);
 
+    useDebouncedEffect(() => {
+        setSearchParams({...currentParams, queryValue})
+    }, [queryValue], 300);
 
     useEffect(() => {
         getProduct({
@@ -133,7 +138,7 @@ export function ProductsList() {
                 filterControl={
                 <Filters
                     filters={[]}
-                    queryValue={searchParams.get('queryValue')}
+                    queryValue={queryValue}
                     onQueryChange={handleFiltersQueryChange}
                     onQueryClear={handleQueryValueRemove}
                     onClearAll={handleFiltersClearAll}
