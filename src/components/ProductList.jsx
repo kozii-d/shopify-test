@@ -8,7 +8,7 @@ import {
     Pagination,
     Filters,
     Page,
-    Layout
+    Layout, TextField
 } from "@shopify/polaris";
 import {gql, useLazyQuery} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
@@ -153,12 +153,12 @@ export function ProductsList() {
                             renderItem={(item) => {
                                 const {node: {title, id, vendor}} = item;
                                 const media = <Avatar customer size="medium" name={title}/>;
-
+                                const idProduct = id.substring(id.lastIndexOf('/')+1)
                                 return (
                                     <ResourceItem
                                         id={id}
                                         media={media}
-                                        // url={`/product-form/${id}`}
+                                        onClick={()=>{navigate('/product-update/' + idProduct)}}
                                         accessibilityLabel={`View details for ${title}`}
                                     >
                                         <h3>
