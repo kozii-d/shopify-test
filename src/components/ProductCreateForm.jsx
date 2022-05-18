@@ -3,12 +3,12 @@ import {
     FormLayout,
     TextField, Form, Button, Banner,
 } from "@shopify/polaris";
-import {useCallback, useEffect, useState} from "react";
-import {gql, useLazyQuery, useMutation, useQuery} from "@apollo/client";
+import {useCallback, useState} from "react";
+import {gql, useMutation} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
-const PRODUCTS_QUERY = gql`
+const CREATE_PRODUCT = gql`
     mutation populateProduct($input: ProductInput!) {
         productCreate(input: $input) {
             product {
@@ -20,17 +20,7 @@ const PRODUCTS_QUERY = gql`
 `;
 
 
-const GET_PRODUCT = gql`
-    query getProduct($id: ID!) {
-        product(id: $id) {
-            title
-            description
-        }
-    }
-`;
-
-
-export function ProductForm() {
+export function ProductCreateForm() {
     let location = useLocation();
     let navigate = useNavigate();
     useRoutePropagation(location);
@@ -40,34 +30,15 @@ export function ProductForm() {
         }
     });
 
-    const [getProduct, { data }] = useLazyQuery(GET_PRODUCT, {
-        variables: {
-            id: `gid://shopify/Product/${useParams().id}`
-        }
-    });
-
-
-    const [productCreate, {loading, error}] = useMutation(PRODUCTS_QUERY);
+    const [productCreate, {loading, error}] = useMutation(CREATE_PRODUCT);
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-
-    // if (useParams().id) {
-    //     useEffect(() => {
-    //         getProduct().then(r => {
-    //             setTitle(r.data.product.title)
-    //             setDescription(r.data.product.description)
-    //         })
-    //         console.log(data)
-    //     }, [])
-    // }
-
 
     const handleTitleChange = useCallback((value) => setTitle(value), []);
     const handleDescriptionChange = useCallback((value) => setDescription(value), []);
     const handleSubmit = useCallback(() => {
         if (title && title.trim()) {
-            console.log(title.trim())
             productCreate({
                 variables: {
                     input: {
@@ -84,13 +55,13 @@ export function ProductForm() {
     if (error) {
         console.warn(error);
         return (
-            <Banner status="critical">There was an issue loading products.</Banner>
+            <Banner status="critical">There was an issue loading product.</Banner>
         );
     }
 
 
     return (
-        <Page title={useParams().id ? 'Change product' : 'Create product'}>
+        <Page title='Create product'>
             {loading && <Loading/>}
             <Form onSubmit={handleSubmit}>
                 <FormLayout>

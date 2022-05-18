@@ -158,6 +158,7 @@ export function ProductsList() {
                                     <ResourceItem
                                         id={id}
                                         media={media}
+                                        // url={`/product-form/${id}`}
                                         accessibilityLabel={`View details for ${title}`}
                                     >
                                         <h3>

@@ -17,8 +17,10 @@ import "@shopify/polaris/build/esm/styles.css";
 import { HomePage } from "./components/HomePage";
 import {Routes, Route, BrowserRouter} from "react-router-dom";
 import {ProductsList} from "./components/ProductList";
-import {ProductForm} from "./components/ProductForm";
+import {ProductCreateForm} from "./components/ProductCreateForm.jsx";
 import {ProductsCard} from "./components/ProductsCard";
+import {ProductUpdateForm} from "./components/ProductUpdateForm.jsx";
+import {AppNavigation} from "./components/AppNavigation.jsx";
 
 export default function App() {
   const primaryAction = {content: 'Foo', url: '/foo'};
@@ -45,8 +47,8 @@ export default function App() {
               <Routes>
                 <Route path='/' element={<HomePage />}></Route>
                 <Route path='/product-list' element={<ProductsList />}></Route>
-                <Route path='/product-form' element={<ProductForm />}></Route>
-                <Route path='/product-form/:id' element={<ProductForm />}></Route>
+                <Route path='/product-create' element={<ProductCreateForm />}></Route>
+                <Route path='/product-update/:id' element={<ProductUpdateForm />}></Route>
                 <Route path='/generator' element={<ProductsCard />}></Route>
                 <Route path='/*' element={<ProductsList />}></Route>
               </Routes>
@@ -59,29 +61,6 @@ export default function App() {
 
 function MyProvider({ children }) {
   const app = useAppBridge();
-
-  const homeLink = AppLink.create(app, {
-    label: 'Home',
-    destination: '/',
-  });
-  const productsLink = AppLink.create(app, {
-    label: 'Products',
-    destination: '/products',
-  });
-  const productFormLink = AppLink.create(app, {
-    label: 'Create/change product',
-    destination: '/product-form',
-  });
-  const generatorLink = AppLink.create(app, {
-    label: 'Product Generator',
-    destination: '/generator',
-  });
-  const navigationMenu = NavigationMenu.create(app, {
-    items: [homeLink, productsLink, productFormLink, generatorLink],
-    active: homeLink,
-  });
-  // navigationMenu.set({active: itemsLink});
-
 
   const defaultOptions = {
     watchQuery: {
@@ -105,7 +84,12 @@ function MyProvider({ children }) {
     }),
   });
 
-  return <ApolloProvider client={client}>{children}</ApolloProvider>;
+  return <>
+    <AppNavigation/>
+    <ApolloProvider client={client}>{children}</ApolloProvider>;
+
+  </>
+
 }
 
 export function userLoggedInFetch(app) {
