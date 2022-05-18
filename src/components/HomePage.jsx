@@ -4,11 +4,20 @@ import {
     Card, TextContainer, Heading, DisplayText,
 } from "@shopify/polaris";
 import {useEffect, useState} from "react";
-import {useAppBridge} from "@shopify/app-bridge-react";
+import {useAppBridge, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {userLoggedInFetch} from "../App.jsx";
+import {useLocation, useNavigate} from "react-router-dom";
 
 
 export function HomePage() {
+    let location = useLocation();
+    let navigate = useNavigate();
+    useRoutePropagation(location);
+    useClientRouting({
+        replace(path) {
+            navigate(path);
+        }
+    });
     const [productCount, setProductCount] = useState(0);
 
     const app = useAppBridge();

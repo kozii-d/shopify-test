@@ -9,10 +9,11 @@ import {
     Page,
     Layout
 } from "@shopify/polaris";
-import {Toast, useAppBridge} from "@shopify/app-bridge-react";
+import {Toast, useAppBridge, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {gql, useMutation} from "@apollo/client";
 
 import {userLoggedInFetch} from "../App";
+import {useLocation, useNavigate} from "react-router-dom";
 
 const PRODUCTS_QUERY = gql`
     mutation populateProduct($input: ProductInput!) {
@@ -25,6 +26,14 @@ const PRODUCTS_QUERY = gql`
 `;
 
 export function ProductsCard() {
+    let location = useLocation();
+    let navigate = useNavigate();
+    useRoutePropagation(location);
+    useClientRouting({
+        replace(path) {
+            navigate(path);
+        }
+    });
     const [populateProduct, {loading}] = useMutation(PRODUCTS_QUERY);
     const [productCount, setProductCount] = useState(0);
     const [hasResults, setHasResults] = useState(false);

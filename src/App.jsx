@@ -17,6 +17,7 @@ import "@shopify/polaris/build/esm/styles.css";
 import { HomePage } from "./components/HomePage";
 import {Routes, Route, BrowserRouter} from "react-router-dom";
 import {ProductsList} from "./components/ProductList";
+import {ProductForm} from "./components/ProductForm";
 import {ProductsCard} from "./components/ProductsCard";
 
 export default function App() {
@@ -43,8 +44,10 @@ export default function App() {
               />
               <Routes>
                 <Route path='/' element={<HomePage />}></Route>
-                <Route path='/generator' element={<ProductsCard />}></Route>
                 <Route path='/product-list' element={<ProductsList />}></Route>
+                <Route path='/product-form' element={<ProductForm />}></Route>
+                <Route path='/product-form/:id' element={<ProductForm />}></Route>
+                <Route path='/generator' element={<ProductsCard />}></Route>
                 <Route path='/*' element={<ProductsList />}></Route>
               </Routes>
             </MyProvider>
@@ -65,12 +68,16 @@ function MyProvider({ children }) {
     label: 'Products',
     destination: '/products',
   });
+  const productFormLink = AppLink.create(app, {
+    label: 'Create/change product',
+    destination: '/product-form',
+  });
   const generatorLink = AppLink.create(app, {
     label: 'Product Generator',
     destination: '/generator',
   });
   const navigationMenu = NavigationMenu.create(app, {
-    items: [homeLink, productsLink, generatorLink],
+    items: [homeLink, productsLink, productFormLink, generatorLink],
     active: homeLink,
   });
   // navigationMenu.set({active: itemsLink});
