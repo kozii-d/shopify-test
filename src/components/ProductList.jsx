@@ -5,11 +5,14 @@ import {
     ResourceItem,
     Avatar,
     Banner,
-    Pagination, Filters
+    Pagination,
+    Filters,
+    Page,
+    Layout
 } from "@shopify/polaris";
 import {gql, useLazyQuery} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {useDebouncedEffect} from "../customHooks/useDebouncedEffect.jsx";
 
@@ -121,49 +124,56 @@ export function ProductsList() {
     if (!previousData && !data) return <Loading/>;
 
     return (
-        <Card sectioned>
-            <ResourceList
-                resourceName={{singular: 'product', plural: 'products'}}
-                loading={loading}
-                items={data ? data.products.edges : previousData.products.edges}
-                sortValue={searchParams.get('sort')}
-                sortOptions={[
-                    {label: 'Title (A-Z)', value: 'TITLE_A-Z'},
-                    {label: 'Title (Z-A)', value: 'TITLE_Z-A'},
-                ]}
-                onSortChange={(selected) => {
-                    setSearchParams({...currentParams, sort: selected})
-                    console.log(`Sort option changed to ${selected}.`);
-                }}
-                filterControl={
-                <Filters
-                    filters={[]}
-                    queryValue={queryValue}
-                    onQueryChange={handleFiltersQueryChange}
-                    onQueryClear={handleQueryValueRemove}
-                    onClearAll={handleFiltersClearAll}
-                />
-                }
-                renderItem={(item) => {
-                    const {node: {title, id, vendor}} = item;
-                    const media = <Avatar customer size="medium" name={title}/>;
+        <Page title='Product list' fullWidth>
+            <Layout>
+                <Layout.Section>
+                    <Card sectioned>
+                        <ResourceList
+                            resourceName={{singular: 'product', plural: 'products'}}
+                            loading={loading}
+                            items={data ? data.products.edges : previousData.products.edges}
+                            sortValue={searchParams.get('sort')}
+                            sortOptions={[
+                                {label: 'Title (A-Z)', value: 'TITLE_A-Z'},
+                                {label: 'Title (Z-A)', value: 'TITLE_Z-A'},
+                            ]}
+                            onSortChange={(selected) => {
+                                setSearchParams({...currentParams, sort: selected})
+                                console.log(`Sort option changed to ${selected}.`);
+                            }}
+                            filterControl={
+                                <Filters
+                                    filters={[]}
+                                    queryValue={queryValue}
+                                    onQueryChange={handleFiltersQueryChange}
+                                    onQueryClear={handleQueryValueRemove}
+                                    onClearAll={handleFiltersClearAll}
+                                />
+                            }
+                            renderItem={(item) => {
+                                const {node: {title, id, vendor}} = item;
+                                const media = <Avatar customer size="medium" name={title}/>;
 
-                    return (
-                        <ResourceItem
-                            id={id}
-                            media={media}
-                            accessibilityLabel={`View details for ${title}`}
-                        >
-                            <h3>
-                                <TextStyle variation="strong">{title}</TextStyle>
-                            </h3>
-                            <div>{vendor}</div>
-                        </ResourceItem>
-                    );
-                }}
-            />
-            <Pagination hasPrevious={data && data.products.pageInfo.hasPreviousPage} onPrevious={onPrevious} onNext={onNext}
-                        hasNext={data && data.products.pageInfo.hasNextPage}/>
-        </Card>
+                                return (
+                                    <ResourceItem
+                                        id={id}
+                                        media={media}
+                                        accessibilityLabel={`View details for ${title}`}
+                                    >
+                                        <h3>
+                                            <TextStyle variation="strong">{title}</TextStyle>
+                                        </h3>
+                                        <div>{vendor}</div>
+                                    </ResourceItem>
+                                );
+                            }}
+                        />
+                        <Pagination hasPrevious={data && data.products.pageInfo.hasPreviousPage} onPrevious={onPrevious}
+                                    onNext={onNext}
+                                    hasNext={data && data.products.pageInfo.hasNextPage}/>
+                    </Card>
+                </Layout.Section>
+            </Layout>
+        </Page>
     );
 }

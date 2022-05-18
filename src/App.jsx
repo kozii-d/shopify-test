@@ -16,24 +16,14 @@ import "@shopify/polaris/build/esm/styles.css";
 
 import { HomePage } from "./components/HomePage";
 import {Routes, Route, BrowserRouter} from "react-router-dom";
+import {ProductsList} from "./components/ProductList";
+import {ProductsCard} from "./components/ProductsCard";
 
 export default function App() {
   const primaryAction = {content: 'Foo', url: '/foo'};
   const secondaryActions = [{content: 'Bar', url: '/bar', loading: true}];
   const actionGroups = [{title: 'Baz', actions: [{content: 'Baz', url: '/baz'}]}];
 
-  // const itemsLink = AppLink.create(app, {
-  //   label: 'Items',
-  //   destination: '/items',
-  // });
-  // const settingsLink = AppLink.create(app, {
-  //   label: 'Settings',
-  //   destination: '/settings',
-  // });
-  // const navigationMenu = NavigationMenu.create(app, {
-  //   items: [itemsLink, settingsLink],
-  //   active: settingsLink,
-  // });
   return (
       <BrowserRouter>
         <PolarisProvider i18n={translations}>
@@ -52,7 +42,10 @@ export default function App() {
                   actionGroups={actionGroups}
               />
               <Routes>
-                <Route path='/*' element={<HomePage />}></Route>
+                <Route path='/' element={<HomePage />}></Route>
+                <Route path='/generator' element={<ProductsCard />}></Route>
+                <Route path='/product-list' element={<ProductsList />}></Route>
+                <Route path='/*' element={<ProductsList />}></Route>
               </Routes>
             </MyProvider>
           </AppBridgeProvider>
@@ -63,6 +56,25 @@ export default function App() {
 
 function MyProvider({ children }) {
   const app = useAppBridge();
+
+  const homeLink = AppLink.create(app, {
+    label: 'Home',
+    destination: '/',
+  });
+  const productsLink = AppLink.create(app, {
+    label: 'Products',
+    destination: '/products',
+  });
+  const generatorLink = AppLink.create(app, {
+    label: 'Product Generator',
+    destination: '/generator',
+  });
+  const navigationMenu = NavigationMenu.create(app, {
+    items: [homeLink, productsLink, generatorLink],
+    active: homeLink,
+  });
+  // navigationMenu.set({active: itemsLink});
+
 
   const defaultOptions = {
     watchQuery: {
