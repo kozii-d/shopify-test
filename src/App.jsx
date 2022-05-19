@@ -9,7 +9,7 @@ import {
   useAppBridge,
 } from "@shopify/app-bridge-react";
 import { authenticatedFetch } from "@shopify/app-bridge-utils";
-import {AppLink, NavigationMenu, Redirect} from "@shopify/app-bridge/actions";
+import {Redirect} from "@shopify/app-bridge/actions";
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
 import translations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";

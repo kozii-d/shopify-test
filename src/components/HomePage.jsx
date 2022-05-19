@@ -10,6 +10,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 
 
 export function HomePage() {
+    // Route Propagator and Client Routing
     let location = useLocation();
     let navigate = useNavigate();
     useRoutePropagation(location);
@@ -18,6 +19,8 @@ export function HomePage() {
             navigate(path);
         }
     });
+
+    // State
     const [productCount, setProductCount] = useState(0);
 
     const app = useAppBridge();

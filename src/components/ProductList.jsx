@@ -8,39 +8,26 @@ import {
     Pagination,
     Filters,
     Page,
-    Layout, TextField
+    Layout,
+    TextField
 } from "@shopify/polaris";
-import {gql, useLazyQuery} from "@apollo/client";
+import {useLazyQuery} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {useDebouncedEffect} from "../customHooks/useDebouncedEffect.jsx";
+import {GET_PRODUCT_PAGE} from "../graphql/queries.js";
 
-const GET_PRODUCT_PAGE = gql`
-    query getProducts($first: Int, $last: Int, $after: String, $before: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
-        products(first: $first, last: $last, after: $after, before: $before, query: $query, sortKey: $sortKey, reverse: $reverse) {
-            pageInfo {
-                hasNextPage
-                hasPreviousPage
-                startCursor
-                endCursor
-            }
-            edges {
-                cursor
-                node {
-                    title
-                    id
-                    vendor
-                }
-            }
-        }
-    }
-`;
 
 export function ProductsList() {
+    // Search params
     let [searchParams, setSearchParams] = useSearchParams({sort: 'TITLE_A-Z'});
-    const [queryValue, setQueryValue] = useState('');
 
+    // States
+    const [queryValue, setQueryValue] = useState('');
+    const [taggedWith, setTaggedWith] = useState('');
+
+    // Route Propagator and Client Routing
     let location = useLocation();
     let navigate = useNavigate();
     useRoutePropagation(location);
@@ -50,41 +37,47 @@ export function ProductsList() {
         }
     });
 
-
+    // Variables
     const currentParams = useMemo(() => Object.fromEntries([...searchParams]), [searchParams]);
     const isReverse = useMemo(() => searchParams.get('sort') === 'TITLE_Z-A', [searchParams]);
+    const queryParams = useMemo(() => {
+        if (searchParams.get('queryValue') && searchParams.get('taggedWith')) {
+            return `(title:${searchParams.get('queryValue')}*) AND (tag:${searchParams.get('taggedWith')})`;
+        }
+        if (searchParams.get('queryValue') && !searchParams.get('taggedWith')) {
+            return `(title:${searchParams.get('queryValue')}*)`;
+        }
+        if (!searchParams.get('queryValue') && searchParams.get('taggedWith')) {
+            return `(tag:${searchParams.get('taggedWith')})`;
+        }
+        if (!searchParams.get('queryValue') && !searchParams.get('taggedWith')) {
+            return '';
+        }
+    }, [searchParams]);
 
-
+    // Handlers
     const handleFiltersQueryChange = useCallback(
         (value) => setQueryValue(value),
         [],
     );
     const handleQueryValueRemove = useCallback(() => setQueryValue(''), []);
+    const handleTaggedWithChange = useCallback(
+        (value) => setTaggedWith(value),
+        [],
+    );
+    const handleTaggedWithRemove = useCallback(() => setTaggedWith(''), []);
     const handleFiltersClearAll = useCallback(() => {
         handleQueryValueRemove();
+        handleTaggedWithRemove();
     }, [
         handleQueryValueRemove,
+        handleTaggedWithRemove,
     ]);
 
-
+    // Get product query
     const [getProduct, {loading, error, data, previousData}] = useLazyQuery(GET_PRODUCT_PAGE);
 
-    useDebouncedEffect(() => {
-        setSearchParams({...currentParams, queryValue})
-    }, [queryValue], 300);
-
-    useEffect(() => {
-        getProduct({
-            variables: {
-                first: 10,
-                query: searchParams.get('queryValue'),
-                sortKey: 'TITLE',
-                reverse: isReverse,
-            }
-        });
-    }, [searchParams]);
-
-
+    // Pagination actions
     const onNext = useCallback(() => {
         const edges = data.products.edges;
         getProduct({
@@ -113,7 +106,24 @@ export function ProductsList() {
         });
     }, [getProduct, data]);
 
+    // Update searchParams
+    useDebouncedEffect(() => {
+        setSearchParams({...currentParams, queryValue, taggedWith})
+    }, [queryValue, taggedWith], 300);
 
+    // Init query
+    useEffect(() => {
+        getProduct({
+            variables: {
+                first: 10,
+                query: queryParams,
+                sortKey: 'TITLE',
+                reverse: isReverse,
+            }
+        });
+    }, [searchParams]);
+
+    // Error banner
     if (error) {
         console.warn(error);
         return (
@@ -121,7 +131,37 @@ export function ProductsList() {
         );
     }
 
+    // App Bridge loading
     if (!previousData && !data) return <Loading/>;
+
+    // Filters
+    const filters = [
+        {
+            key: 'taggedWith1',
+            label: 'Tagged with',
+            filter: (
+                <TextField
+                    label="Tagged with"
+                    value={taggedWith}
+                    onChange={handleTaggedWithChange}
+                    autoComplete="off"
+                    labelHidden
+                />
+            ),
+            shortcut: true,
+        },
+    ];
+
+    const appliedFilters = !isEmpty(taggedWith)
+        ? [
+            {
+                key: 'taggedWith1',
+                label: disambiguateLabel('taggedWith1', taggedWith),
+                onRemove: handleTaggedWithRemove,
+            },
+        ]
+        : [];
+
 
     return (
         <Page title='Product list' fullWidth>
@@ -143,7 +183,8 @@ export function ProductsList() {
                             }}
                             filterControl={
                                 <Filters
-                                    filters={[]}
+                                    filters={filters}
+                                    appliedFilters={appliedFilters}
                                     queryValue={queryValue}
                                     onQueryChange={handleFiltersQueryChange}
                                     onQueryClear={handleQueryValueRemove}
@@ -177,4 +218,22 @@ export function ProductsList() {
             </Layout>
         </Page>
     );
+}
+
+
+function disambiguateLabel(key, value) {
+    switch (key) {
+        case 'taggedWith1':
+            return `Tagged with ${value}`;
+        default:
+            return value;
+    }
+}
+
+function isEmpty(value) {
+    if (Array.isArray(value)) {
+        return value.length === 0;
+    } else {
+        return value === '' || value == null;
+    }
 }

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {useAppBridge} from "@shopify/app-bridge-react";
 import {AppLink, NavigationMenu} from "@shopify/app-bridge/actions";
 

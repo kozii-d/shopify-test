@@ -1,26 +1,20 @@
 import {
     Page,
     FormLayout,
-    TextField, Form, Button, Banner,
+    TextField,
+    Form,
+    Button,
+    Banner,
 } from "@shopify/polaris";
 import {useCallback, useState} from "react";
-import {gql, useMutation} from "@apollo/client";
+import {useMutation} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useLocation, useNavigate} from "react-router-dom";
-
-const CREATE_PRODUCT = gql`
-    mutation populateProduct($input: ProductInput!) {
-        productCreate(input: $input) {
-            product {
-                title
-                descriptionHtml
-            }
-        }
-    }
-`;
+import {CREATE_PRODUCT} from "../graphql/queries.js";
 
 
 export function ProductCreateForm() {
+    // Route Propagator and Client Routing
     let location = useLocation();
     let navigate = useNavigate();
     useRoutePropagation(location);
@@ -30,11 +24,14 @@ export function ProductCreateForm() {
         }
     });
 
+    // Mutation
     const [productCreate, {loading, error}] = useMutation(CREATE_PRODUCT);
 
+    // States
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
+    // Handlers
     const handleTitleChange = useCallback((value) => setTitle(value), []);
     const handleDescriptionChange = useCallback((value) => setDescription(value), []);
     const handleSubmit = useCallback(() => {
@@ -52,6 +49,7 @@ export function ProductCreateForm() {
         }
     }, [title, description]);
 
+    // Error banner
     if (error) {
         console.warn(error);
         return (

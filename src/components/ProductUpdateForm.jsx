@@ -7,34 +7,14 @@ import {
     Banner,
 } from "@shopify/polaris";
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {gql, useMutation, useQuery} from "@apollo/client";
+import {useMutation, useQuery} from "@apollo/client";
 import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
-
-
-const UPDATE_PRODUCT = gql`
-    mutation productUpdate($input: ProductInput!) {
-        productUpdate(input: $input) {
-            product {
-                id
-                title
-                descriptionHtml
-            }
-        }
-    }
-`;
-
-const GET_PRODUCT = gql`
-    query getProduct($id: ID!) {
-        product(id: $id) {
-            title
-            description
-        }
-    }
-`;
+import {GET_PRODUCT, UPDATE_PRODUCT} from "../graphql/queries.js";
 
 
 export function ProductUpdateForm() {
+    // Route Propagator and Client Routing
     let location = useLocation();
     let navigate = useNavigate();
     useRoutePropagation(location);
@@ -44,8 +24,15 @@ export function ProductUpdateForm() {
         }
     });
 
+    // Route params
     const {id} = useParams();
 
+    // States
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+
+
+    // Queries and mutation
     const {data, loading: loadingGet, error: errorGet} = useQuery(GET_PRODUCT, {
         variables: {
             id: 'gid://shopify/Product/' + id
@@ -53,17 +40,7 @@ export function ProductUpdateForm() {
     });
     const [productUpdate, {loading: loadingUpdate, error: errorUpdate}] = useMutation(UPDATE_PRODUCT);
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-
-
-    useEffect(() => {
-        if (data) {
-            setTitle(data.product.title);
-            setDescription(data.product.description);
-        }
-    }, [data])
-
+    // Handlers
     const handleTitleChange = useCallback((value) => setTitle(value), []);
     const handleDescriptionChange = useCallback((value) => setDescription(value), []);
     const handleSubmit = useCallback(() => {
@@ -76,18 +53,28 @@ export function ProductUpdateForm() {
                         descriptionHtml: `<p>${description}</p>`,
                     }
                 }
+            }).then(() => {
+                setTitle('');
+                setDescription('');
+                navigate('/products');
             });
-            setTitle('');
-            setDescription('');
-            navigate('/products');
         }
     }, [title, description]);
 
+    // Variables
     const isCanUpdate = useMemo(() => {
         return data ? title !== data.product.title || description !== data.product.description : false;
+    }, [title, description, data]);
 
-    }, [title, description, data])
+    // Set states after query response
+    useEffect(() => {
+        if (data) {
+            setTitle(data.product.title);
+            setDescription(data.product.description);
+        }
+    }, [data])
 
+    // Error banner
     if (errorGet || errorUpdate) {
         console.warn(errorGet || errorUpdate);
         return (
