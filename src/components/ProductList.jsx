@@ -79,12 +79,13 @@ export function ProductsList() {
 
     // Pagination actions
     const onNext = useCallback(() => {
-        const edges = data.products.edges;
+        const cursor = data.products.edges[data.products.edges.length - 1].cursor;
+        // setSearchParams({...currentParams, first: 10, last: '', after: cursor, before: ''})
         getProduct({
             variables: {
                 first: 10,
                 last: null,
-                after: edges[edges.length - 1].cursor,
+                after: cursor,
                 before: null,
                 sortKey: 'TITLE',
                 reverse: isReverse,
@@ -93,13 +94,14 @@ export function ProductsList() {
     }, [getProduct, data]);
 
     const onPrevious = useCallback(() => {
-        const edges = data.products.edges;
+        const cursor = data.products.edges[0].cursor;
+        // setSearchParams({...currentParams, first: '', last: 10, after: '', before: cursor})
         getProduct({
             variables: {
                 first: null,
                 last: 10,
                 after: null,
-                before: edges[0].cursor,
+                before: cursor,
                 sortKey: 'TITLE',
                 reverse: isReverse,
             }
