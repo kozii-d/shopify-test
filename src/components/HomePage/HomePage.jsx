@@ -3,13 +3,12 @@ import {
     Layout,
     Card, TextContainer, Heading, DisplayText,
 } from "@shopify/polaris";
-import {useEffect, useState} from "react";
-import {useAppBridge, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
-import {userLoggedInFetch} from "../App.jsx";
+import {useEffect} from "react";
+import {useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useLocation, useNavigate} from "react-router-dom";
 
 
-export function HomePage() {
+export function HomePage({totalProductCount, publishedProductCount, unpublishedProductCount, getTotalProductCount, getPublishedProductCount, getUnpublishedProductCount}) {
     // Route Propagator and Client Routing
     let location = useLocation();
     let navigate = useNavigate();
@@ -20,18 +19,12 @@ export function HomePage() {
         }
     });
 
-    // State
-    const [productCount, setProductCount] = useState(0);
 
-    const app = useAppBridge();
-    const fetch = userLoggedInFetch(app);
-
-    async function updateProductCount() {
-        const {count} = await fetch("/products/count").then((res) => res.json());
-        setProductCount(count);
-    }
-
-    useEffect(updateProductCount, []);
+    useEffect(() => {
+        getTotalProductCount();
+        getPublishedProductCount();
+        getUnpublishedProductCount();
+    }, []);
 
     return (
         <Page title='Product Counter' fullWidth>
@@ -39,21 +32,21 @@ export function HomePage() {
                 <Layout.Section secondary>
                     <Card title='All products' sectioned>
                         <TextContainer>
-                            <Heading element='h2'>Total number of products: {<DisplayText>{productCount}</DisplayText>}</Heading>
+                            <Heading element='h2'>Total number of products: {<DisplayText>{totalProductCount}</DisplayText>}</Heading>
                         </TextContainer>
                     </Card>
                 </Layout.Section>
                 <Layout.Section secondary>
                     <Card title='Published products' sectioned>
                         <TextContainer>
-                            <Heading element='h2'>Number of published products: {<DisplayText>{productCount}</DisplayText>}</Heading>
+                            <Heading element='h2'>Number of published products: {<DisplayText>{publishedProductCount}</DisplayText>}</Heading>
                         </TextContainer>
                     </Card>
                 </Layout.Section>
                 <Layout.Section secondary>
                     <Card title='Unpublished products' sectioned>
                         <TextContainer>
-                            <Heading element='h2'>Number of unpublished products: {<DisplayText>{productCount}</DisplayText>}</Heading>
+                            <Heading element='h2'>Number of unpublished products: {<DisplayText>{unpublishedProductCount}</DisplayText>}</Heading>
                         </TextContainer>
                     </Card>
                 </Layout.Section>

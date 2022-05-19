@@ -7,6 +7,8 @@ import "dotenv/config";
 
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
+import bodyParser from "express";
+import axios from "axios";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -69,6 +71,22 @@ export async function createServer(
 
     const countData = await Product.count({ session });
     res.status(200).send(countData);
+  });
+
+  app.post("/rest", verifyRequest(app), bodyParser.json(), async (req, res) => {
+    const session = await Shopify.Utils.loadCurrentSession(req, res, true);
+
+    try {
+      const {data} = await axios.get(req.body.url, {
+        headers: {
+          'X-Shopify-Access-Token': session.accessToken
+        }
+      });
+      res.status(200).send(data);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+
   });
 
   app.post("/graphql", verifyRequest(app), async (req, res) => {

@@ -8,13 +8,13 @@ import {
   Provider as AppBridgeProvider, TitleBar,
   useAppBridge,
 } from "@shopify/app-bridge-react";
-import { authenticatedFetch } from "@shopify/app-bridge-utils";
+import {authenticatedFetch} from "@shopify/app-bridge-utils";
 import {Redirect} from "@shopify/app-bridge/actions";
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
 import translations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";
 
-import { HomePage } from "./components/HomePage";
+import HomePage from "./components/HomePage/index.js";
 import {Routes, Route, BrowserRouter} from "react-router-dom";
 import {ProductsList} from "./components/ProductList";
 import {ProductCreateForm} from "./components/ProductCreateForm.jsx";
