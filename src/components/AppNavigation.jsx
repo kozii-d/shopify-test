@@ -18,18 +18,18 @@ export function AppNavigation() {
         label: 'Home',
         destination: '/',
     }), []);
-    const productsLink = {
+    const productsLink = useMemo(() => ({
         label: 'Products',
         destination: '/products',
-    };
-    const productFormLink = {
+    }), []);
+    const productFormLink = useMemo(() => ({
         label: 'Create product',
-            destination: '/product-create',
-    };
-    const generatorLink = {
+        destination: '/product-create',
+    }), []);
+    const generatorLink = useMemo(() => ({
         label: 'Product Generator',
         destination: '/generator',
-    };
+    }), []);
 
     return <NavigationMenu
         navigationLinks={[homeLink, productsLink, productFormLink, generatorLink]}
