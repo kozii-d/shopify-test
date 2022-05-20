@@ -38,6 +38,7 @@ export default function App() {
               }}
           >
             <MyProvider>
+              <AppNavigation/>
               <TitleBar
                   title="Hello world!"
                   primaryAction={primaryAction}
@@ -84,12 +85,7 @@ function MyProvider({ children }) {
     }),
   });
 
-  return <>
-    <AppNavigation/>
-    <ApolloProvider client={client}>{children}</ApolloProvider>;
-
-  </>
-
+  return <ApolloProvider client={client}>{children}</ApolloProvider>;
 }
 
 export function userLoggedInFetch(app) {

@@ -1,30 +1,37 @@
-import React from 'react';
-import {useAppBridge} from "@shopify/app-bridge-react";
-import {AppLink, NavigationMenu} from "@shopify/app-bridge/actions";
+import React, {useMemo} from 'react';
+import {NavigationMenu, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {useLocation, useNavigate} from "react-router-dom";
 
-export function AppNavigation({active}) {
-    const app = useAppBridge();
+export function AppNavigation() {
+    // Route Propagator and Client Routing
+    let location = useLocation();
+    let navigate = useNavigate();
+    useRoutePropagation(location);
+    useClientRouting({
+        replace(path) {
+            navigate(path);
+        }
+    });
 
-    const homeLink = AppLink.create(app, {
+    // Navigation links
+    const homeLink = useMemo(() => ({
         label: 'Home',
         destination: '/',
-    });
-    const productsLink = AppLink.create(app, {
+    }), []);
+    const productsLink = {
         label: 'Products',
         destination: '/products',
-    });
-    const productFormLink = AppLink.create(app, {
+    };
+    const productFormLink = {
         label: 'Create product',
-        destination: '/product-create',
-    });
-    const generatorLink = AppLink.create(app, {
+            destination: '/product-create',
+    };
+    const generatorLink = {
         label: 'Product Generator',
         destination: '/generator',
-    });
-    const navigationMenu = NavigationMenu.create(app, {
-        items: [homeLink, productsLink, productFormLink, generatorLink],
-        active: homeLink,
-    });
+    };
 
-    return null;
+    return <NavigationMenu
+        navigationLinks={[homeLink, productsLink, productFormLink, generatorLink]}
+    />;
 }
