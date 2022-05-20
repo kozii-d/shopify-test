@@ -56,17 +56,32 @@ export function ProductsList() {
     }, [searchParams]);
 
     // Handlers
-    const handleFiltersQueryChange = useCallback(
-        (value) => setQueryValue(value),
+    const handleSetDefaultSearchParams= useCallback(() => {
+        setSearchParams({...currentParams, first: 10, last: '', after: '', before: ''});
+    }, [currentParams]);
+
+    const handleFiltersQueryChange = useCallback((value) => {
+            handleSetDefaultSearchParams();
+            setQueryValue(value);
+        },
         [],
     );
-    const handleQueryValueRemove = useCallback(() => setQueryValue(''), []);
-    const handleTaggedWithChange = useCallback(
-        (value) => setTaggedWith(value),
+    const handleQueryValueRemove = useCallback(() => {
+        handleSetDefaultSearchParams();
+        setQueryValue('');
+    }, []);
+    const handleTaggedWithChange = useCallback((value) => {
+            handleSetDefaultSearchParams();
+            setTaggedWith(value);
+        },
         [],
     );
-    const handleTaggedWithRemove = useCallback(() => setTaggedWith(''), []);
+    const handleTaggedWithRemove = useCallback(() => {
+        handleSetDefaultSearchParams();
+        setTaggedWith('');
+    }, []);
     const handleFiltersClearAll = useCallback(() => {
+        handleSetDefaultSearchParams();
         handleQueryValueRemove();
         handleTaggedWithRemove();
     }, [
@@ -77,34 +92,56 @@ export function ProductsList() {
     // Get product query
     const [getProduct, {loading, error, data, previousData}] = useLazyQuery(GET_PRODUCT_PAGE);
 
-    // Pagination actions
-    const onNext = useCallback(() => {
-        const cursor = data.products.edges[data.products.edges.length - 1].cursor;
-        // setSearchParams({...currentParams, first: 10, last: '', after: cursor, before: ''})
-        getProduct({
-            variables: {
+    const queryVariables = useMemo(() => {
+        if (searchParams.get('first') && searchParams.get('after')) {
+            return {
                 first: 10,
                 last: null,
-                after: cursor,
+                after: searchParams.get('after'),
                 before: null,
+                query: queryParams,
                 sortKey: 'TITLE',
                 reverse: isReverse,
             }
+        }
+        if (searchParams.get('last') && searchParams.get('before')) {
+            return {
+                first: null,
+                last: 10,
+                after: null,
+                before: searchParams.get('before'),
+                query: queryParams,
+                sortKey: 'TITLE',
+                reverse: isReverse,
+            }
+        }
+        if (!(searchParams.get('first') && searchParams.get('after')) && !(searchParams.get('last') && searchParams.get('before'))) {
+            return {
+                first: 10,
+                last: null,
+                after: null,
+                before: null,
+                query: queryParams,
+                sortKey: 'TITLE',
+                reverse: isReverse,
+            }
+        }
+    }, [searchParams])
+
+    // Pagination actions
+    const onNext = useCallback(() => {
+        const cursor = data.products.edges[data.products.edges.length - 1].cursor;
+        setSearchParams({...currentParams, first: 10, last: '', after: cursor, before: ''})
+        getProduct({
+            variables: queryVariables
         });
     }, [getProduct, data]);
 
     const onPrevious = useCallback(() => {
         const cursor = data.products.edges[0].cursor;
-        // setSearchParams({...currentParams, first: '', last: 10, after: '', before: cursor})
+        setSearchParams({...currentParams, first: '', last: 10, after: '', before: cursor})
         getProduct({
-            variables: {
-                first: null,
-                last: 10,
-                after: null,
-                before: cursor,
-                sortKey: 'TITLE',
-                reverse: isReverse,
-            }
+            variables: queryVariables
         });
     }, [getProduct, data]);
 
@@ -116,12 +153,7 @@ export function ProductsList() {
     // Init query
     useEffect(() => {
         getProduct({
-            variables: {
-                first: 10,
-                query: queryParams,
-                sortKey: 'TITLE',
-                reverse: isReverse,
-            }
+            variables: queryVariables
         });
     }, [searchParams]);
 
@@ -180,7 +212,7 @@ export function ProductsList() {
                                 {label: 'Title (Z-A)', value: 'TITLE_Z-A'},
                             ]}
                             onSortChange={(selected) => {
-                                setSearchParams({...currentParams, sort: selected})
+                                setSearchParams({...currentParams, sort: selected, first: 10, last: '', after: '', before: ''})
                                 console.log(`Sort option changed to ${selected}.`);
                             }}
                             filterControl={
