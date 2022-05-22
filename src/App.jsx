@@ -66,12 +66,10 @@ function MyProvider({ children }) {
   const defaultOptions = {
     watchQuery: {
       fetchPolicy: 'no-cache',
-      nextFetchPolicy: 'no-cache',
       errorPolicy: 'ignore',
     },
     query: {
       fetchPolicy: 'no-cache',
-      nextFetchPolicy: 'no-cache',
       errorPolicy: 'all',
     },
   }
@@ -81,8 +79,8 @@ function MyProvider({ children }) {
     link: new HttpLink({
       credentials: "include",
       fetch: userLoggedInFetch(app),
-      defaultOptions: defaultOptions,
     }),
+    defaultOptions,
   });
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;

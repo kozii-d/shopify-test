@@ -132,23 +132,17 @@ export function ProductsList() {
     const onNext = useCallback(() => {
         const cursor = data.products.edges[data.products.edges.length - 1].cursor;
         setSearchParams({...currentParams, first: 10, last: '', after: cursor, before: ''})
-        getProduct({
-            variables: queryVariables
-        });
-    }, [getProduct, data]);
+    }, [data, currentParams]);
 
     const onPrevious = useCallback(() => {
         const cursor = data.products.edges[0].cursor;
         setSearchParams({...currentParams, first: '', last: 10, after: '', before: cursor})
-        getProduct({
-            variables: queryVariables
-        });
-    }, [getProduct, data]);
+    }, [data, currentParams]);
 
     // Update searchParams
     useDebouncedEffect(() => {
         setSearchParams({...currentParams, queryValue, taggedWith})
-    }, [queryValue, taggedWith], 300);
+    }, [queryValue, taggedWith, currentParams], 300);
 
     // Init query
     useEffect(() => {
@@ -244,9 +238,10 @@ export function ProductsList() {
                                 );
                             }}
                         />
-                        <Pagination hasPrevious={data && data.products.pageInfo.hasPreviousPage} onPrevious={onPrevious}
+                        <Pagination hasPrevious={data && !loading ? data.products.pageInfo.hasPreviousPage : false}
+                                    onPrevious={onPrevious}
                                     onNext={onNext}
-                                    hasNext={data && data.products.pageInfo.hasNextPage}/>
+                                    hasNext={data && !loading ? data.products.pageInfo.hasNextPage : false}/>
                     </Card>
                 </Layout.Section>
             </Layout>
