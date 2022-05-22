@@ -8,7 +8,7 @@ import {
 } from "@shopify/polaris";
 import {useCallback, useState} from "react";
 import {useMutation} from "@apollo/client";
-import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {Loading, TitleBar, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useLocation, useNavigate} from "react-router-dom";
 import {CREATE_PRODUCT} from "../graphql/queries.js";
 
@@ -60,6 +60,10 @@ export function ProductCreateForm() {
 
     return (
         <Page title='Create product'>
+            <TitleBar
+                title="Create product"
+                primaryAction={null}
+            />
             {loading && <Loading/>}
             <Form onSubmit={handleSubmit}>
                 <FormLayout>

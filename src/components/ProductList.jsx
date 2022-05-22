@@ -12,7 +12,7 @@ import {
     TextField
 } from "@shopify/polaris";
 import {useLazyQuery} from "@apollo/client";
-import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {Loading, TitleBar, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import {useDebouncedEffect} from "../customHooks/useDebouncedEffect.jsx";
@@ -193,6 +193,10 @@ export function ProductsList() {
 
     return (
         <Page title='Product list' fullWidth>
+            <TitleBar
+                title="Products"
+                primaryAction={null}
+            />
             <Layout>
                 <Layout.Section>
                     <Card sectioned>

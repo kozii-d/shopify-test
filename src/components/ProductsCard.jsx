@@ -9,7 +9,7 @@ import {
     Page,
     Layout
 } from "@shopify/polaris";
-import {Toast, useAppBridge, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {TitleBar, Toast, useAppBridge, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useMutation} from "@apollo/client";
 
 import {userLoggedInFetch} from "../App";
@@ -56,6 +56,10 @@ export function ProductsCard() {
 
     return (
         <Page title='Generate 5 random products'>
+            <TitleBar
+                title="Generator"
+                primaryAction={null}
+            />
             <Layout>
                 <Layout.Section>
                     {toastMarkup}

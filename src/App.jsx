@@ -23,9 +23,6 @@ import {ProductUpdateForm} from "./components/ProductUpdateForm.jsx";
 import {AppNavigation} from "./components/AppNavigation.jsx";
 
 export default function App() {
-  const primaryAction = {content: 'Foo', url: '/foo'};
-  const secondaryActions = [{content: 'Bar', url: '/bar', loading: true}];
-  const actionGroups = [{title: 'Baz', actions: [{content: 'Baz', url: '/baz'}]}];
 
   return (
       <BrowserRouter>
@@ -40,10 +37,8 @@ export default function App() {
             <MyProvider>
               <AppNavigation/>
               <TitleBar
-                  title="Hello world!"
-                  primaryAction={primaryAction}
-                  secondaryActions={secondaryActions}
-                  actionGroups={actionGroups}
+                  title="Home"
+                  primaryAction={null}
               />
               <Routes>
                 <Route path='/' element={<HomePage />}></Route>

@@ -8,7 +8,7 @@ import {
 } from "@shopify/polaris";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {useMutation, useQuery} from "@apollo/client";
-import {Loading, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
+import {Loading, TitleBar, useClientRouting, useRoutePropagation} from "@shopify/app-bridge-react";
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {GET_PRODUCT, UPDATE_PRODUCT} from "../graphql/queries.js";
 
@@ -85,6 +85,10 @@ export function ProductUpdateForm() {
 
     return (
         <Page title='Update product'>
+            <TitleBar
+                title="Update product"
+                primaryAction={null}
+            />
             {(loadingGet || loadingUpdate) && <Loading/>}
             <Form onSubmit={handleSubmit}>
                 <FormLayout>
