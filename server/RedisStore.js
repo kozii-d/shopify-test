@@ -1,5 +1,4 @@
 import {createClient} from 'redis';
-import {Shopify} from "@shopify/shopify-api";
 import {Session} from "@shopify/shopify-api/dist/auth/session/index.js";
 
 class RedisStore {

@@ -1,5 +1,4 @@
 import {MongoStoreModel} from "./models/MongoStoreModel.js";
-import {Shopify} from "@shopify/shopify-api";
 import {Session} from "@shopify/shopify-api/dist/auth/session/index.js";
 
 class MongoStore {
@@ -10,7 +9,7 @@ class MongoStore {
                 id: session.id,
                 data: session
             },
-        {
+    {
                 upsert: true,
                 setDefaultsOnInsert: true
             });

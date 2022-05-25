@@ -33,7 +33,7 @@ export default function applyAuthMiddleware(app) {
                 req.query
             );
 
-            ActiveShopModel.updateOne({shop: session.shop}, {
+            await ActiveShopModel.updateOne({shop: session.shop}, {
                     shop: session.shop,
                     scope: session.scope
                 },
