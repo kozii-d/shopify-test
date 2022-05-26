@@ -3,7 +3,6 @@ import {Session} from "@shopify/shopify-api/dist/auth/session/index.js";
 
 class RedisStore {
     constructor() {
-        // Create a new redis client and connect to the server
         this.client = createClient({
             url: 'redis://localhost:6379',
         });
