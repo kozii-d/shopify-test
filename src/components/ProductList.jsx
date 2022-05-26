@@ -24,8 +24,8 @@ export function ProductsList() {
     let [searchParams, setSearchParams] = useSearchParams({sort: 'TITLE_A-Z'});
 
     // States
-    const [queryValue, setQueryValue] = useState('');
-    const [taggedWith, setTaggedWith] = useState('');
+    const [queryValue, setQueryValue] = useState(searchParams.get('queryValue') ? searchParams.get('queryValue') : '');
+    const [taggedWith, setTaggedWith] = useState(searchParams.get('taggedWith') ? searchParams.get('taggedWith') : '');
 
     // Route Propagator and Client Routing
     let location = useLocation();
